@@ -11,8 +11,14 @@ int main(){
         if ( action == '+' ){
             std::cout << a + b << '\n';
         }else if ( action == '-' ){
-            //std::cout << a - b << '\n';
+            if (a < b){
+                std::cout << "Error\n";
+            } else {
+                std::cout << a - b << '\n';
+            }
         }
     }
+
+    return 0;
 
 }

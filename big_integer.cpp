@@ -2,90 +2,158 @@
 
 namespace NBigInt {
 
- /*
-    TBint &TBint::operator+=(const TBint &rhs) {
-        int tSize = this->Data.size(), rSize = rhs.Data.size();
-        bool isThisMin = tSize <= rSize;
-        int m;
+    TBint::TBint(int64_t a) {
+        this->Data.push_back(a);
+    }
 
-        if (isThisMin){
-            m = tSize;
-        } else {
-            m = rSize;
+    TBint::TBint(std::string &str) {
+        int newSize = ceil(static_cast<double> (str.size()) / TBint::Radix);
+        this->Data.resize(newSize);
+        auto i = str.rbegin();
+        int d = 0;
+        for (auto next = i + TBint::Radix; i < str.rend(); d++, i = next, next = i + TBint::Radix) {
+            auto border = (next >= str.rend())? str.rend() : next;
+            this->Data[d] = StrToll(border.base(), i.base());
         }
-//TODO проверить что количество цифр в бейс позволяет избежать переполнения
-        bool isOverflow = false;
+    }
+
+    void TBint::DeleteLeadingZeroes() {
+        while ( !this->Data.empty() && this->Data.back() == 0 ){
+            this->Data.pop_back();
+        }
+    }
+
+    TBint& TBint::operator+=(const TBint &rhs) {
+        size_t lSize = this->Data.size(), rSize = rhs.Data.size();
+        int m = std::max(lSize, rSize);
+        this->Data.resize(m, 0);
+        int64_t overflow = 0;
         for (int i = 0; i < m; ++i) {
-            this->Data[i] += rhs.Data[i];
-            this->Data[i] += isOverflow;
-            isOverflow = Data[i] >= this->Base;
-            if (isOverflow){
-                this->Data[i] -= this->Base;
+            this->Data[i] += overflow;
+            if (i < rSize) {
+                this->Data[i] += rhs.Data[i];
             }
+            //TODO смотреть на что не переполняется в отрицательное
+
+            overflow = this->Data[i] / TBint::Base;
+            this->Data[i] = this->Data[i] % TBint::Base;
         }
-
-        if ( tSize == rSize ){
-            if ( isOverflow  ){
-                this->Data.push_back(1);
-            }
-            return *this;
-        }
-
-
-        if ( ! isThisMin ) return *this;
-        for ( int i = m; i < rSize; ++i ){
-            this->Data.push_back(rhs.Data[i]);
+        if (overflow) {
+            this->Data.push_back(overflow);
         }
         return *this;
     }
-    */
 
     TBint operator+(const TBint &lhs, const TBint &rhs) {
-        TBint res;
-        size_t lSize = lhs.Data.size(), rSize = rhs.Data.size();
-        int m = std::max( lSize, rSize );
-        res.Data.resize(m);
-        int64_t overflow = 0;
-        for ( int i = 0; i < m; ++i ){
-            uint64_t summ = overflow;
-            if ( i < lSize ){
-                summ += lhs.Data[i];
-            }
-            if ( i < rSize ){
-                summ += rhs.Data[i];
-            }
-            overflow = summ / TBint::Base;
-            res.Data[i] = summ % TBint::Base;
-        }
-        if (overflow) {
-            res.Data.push_back(overflow);
-        }
-
+        TBint res = lhs;
+        res += rhs;
         return res;
     }
 
-    std::istream& operator>>( std::istream& is, TBint& rhs ){
+    std::istream& operator>>(std::istream &is, TBint &rhs) {
         std::string tmp;
-        is >> tmp;
+        if(!(is >> tmp)){
+            return is;
+        }
         TBint newBInt(tmp);
         rhs.Data.swap(newBInt.Data);
         return is;
     }
 
-    TBint::TBint(std::string& str) {
-        int newSize = ceil( static_cast<double> (str.size()) / TBint::Radix );
-        this->Data.resize(newSize);
-        //TODO check borders
-        for (size_t i = 0; i < str.size(); ++i) {
-            this->Data[str.size() - i - 1] = static_cast<int64_t>(str[i] - '0');
+    std::ostream& operator<<(std::ostream &os, const TBint &rhs) {
+        if (rhs.Data.empty()){
+            os << '0';
+            return os;
         }
-    }
-
-    std::ostream& operator<<(std::ostream &os, const TBint& rhs) {
         os << rhs.Data.back();
         os << std::setfill('0') << std::setw(TBint::Radix);
-        std::copy( rhs.Data.rbegin() + 1 , rhs.Data.rend(), std::ostream_iterator<uint64_t>( os ));
+        std::copy(rhs.Data.rbegin() + 1, rhs.Data.rend(), std::ostream_iterator<int64_t>(os));
+        os << std::resetiosflags(std::ios_base::basefield);
         return os;
+    }
+
+    TBint& TBint::operator-=(const TBint &rhs) {
+        // TODO exeption
+        size_t lSize = this->Data.size(), rSize = rhs.Data.size();
+        int m = std::max(lSize, rSize);
+        this->Data.resize(m + 1, 0);
+        int64_t underflow = 0;
+        for (int i = 0; i < m; ++i) {
+            this->Data[i] -= underflow;
+            underflow = 0;
+            if (i < rSize) {
+                this->Data[i] -= rhs.Data[i];
+            }
+            if (this->Data[i] < 0) {
+                underflow = 1;
+                this->Data[i] += TBint::Base;
+            }
+            this->Data[i] = this->Data[i] % TBint::Base;
+        }
+        this->DeleteLeadingZeroes();
+
+        return *this;
+    }
+
+    TBint operator-(const TBint &lhs, const TBint &rhs) {
+        TBint res = lhs;
+        res -= rhs;
+        return res;
+    }
+
+    bool operator<(const TBint &lhs, const TBint &rhs) {
+        if ( lhs.Data.size() != rhs.Data.size() ){
+            return lhs.Data.size() < rhs.Data.size();
+        }
+        for ( int i = lhs.Data.size(); i > 0; --i ){
+            if(lhs.Data[i]!=rhs.Data[i]){
+                return lhs.Data[i] < rhs.Data[i];
+            }
+        }
+        return false;
+    }
+    bool operator>(const TBint &lhs, const TBint &rhs) {
+        if ( lhs.Data.size() != rhs.Data.size() ){
+            return lhs.Data.size() > rhs.Data.size();
+        }
+        for ( int i = lhs.Data.size(); i > 0; --i ){
+            if(lhs.Data[i]!=rhs.Data[i]){
+                return lhs.Data[i] > rhs.Data[i];
+            }
+        }
+        return false;
+    }
+    bool operator==(const TBint &lhs, const TBint &rhs) {
+        if (lhs.Data.size() != rhs.Data.size()) {
+            return false;
+        }
+        for(int i = 0; i < lhs.Data.size(); i++){
+            if (lhs.Data[i] != rhs.Data[i]){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool operator<=(const TBint &lhs, const TBint &rhs) {
+        return (!( lhs > rhs));
+    }
+    bool operator>=(const TBint &lhs, const TBint &rhs) {
+        return (!( lhs < rhs));
+    }
+
+    TBint::operator std::string() const {
+        if (this->Data.empty()){
+            return "0";
+        }
+        std::string res = std::to_string(this->Data.back());
+        for(auto i = this->Data.size() - 2; i > 0; --i){
+            std::string tmp = std::to_string(this->Data[i]);
+            int leadingZeroes = TBint::Radix - tmp.size();
+            res.append(leadingZeroes, '0');
+            res += tmp;
+        }
+        return res;
     }
 
 
