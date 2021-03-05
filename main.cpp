@@ -16,6 +16,9 @@ int main(){
             } else {
                 std::cout << a - b << '\n';
             }
+
+        }else if(action == '='){
+            std::cout << std::boolalpha << (a == b) << '\n';
         }
     }
 

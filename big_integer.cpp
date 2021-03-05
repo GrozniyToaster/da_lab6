@@ -3,10 +3,20 @@
 namespace NBigInt {
 
     TBint::TBint(int64_t a) {
-        this->Data.push_back(a);
+        if ( a < TBint::Base ){
+            if (a != 0){
+                this->Data.push_back(a);
+            }
+            return;
+        }
+        do{
+            this->Data.push_back(a % TBint::Base);
+            a /= TBint::Base;
+        } while ( a > 0 );
+        this->DeleteLeadingZeroes();
     }
 
-    TBint::TBint(std::string &str) {
+    TBint::TBint(const std::string &str) {
         int newSize = ceil(static_cast<double> (str.size()) / TBint::Radix);
         this->Data.resize(newSize);
         auto i = str.rbegin();
@@ -15,6 +25,7 @@ namespace NBigInt {
             auto border = (next >= str.rend())? str.rend() : next;
             this->Data[d] = StrToll(border.base(), i.base());
         }
+        this->DeleteLeadingZeroes();
     }
 
     void TBint::DeleteLeadingZeroes() {
@@ -154,6 +165,10 @@ namespace NBigInt {
             res += tmp;
         }
         return res;
+    }
+
+    bool operator!=(const TBint &lhs, const TBint &rhs) {
+        return !(lhs == rhs);
     }
 
 

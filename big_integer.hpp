@@ -19,7 +19,7 @@ class TBint{
     void DeleteLeadingZeroes();
   public:
     TBint() = default;
-    explicit TBint(std::string&);
+    explicit TBint(const std::string&);
     TBint(int64_t);
 
 
@@ -37,6 +37,7 @@ class TBint{
     friend bool operator<( const TBint& lhs, const TBint& rhs );
     friend bool operator==( const TBint& lhs, const TBint& rhs );
     friend bool operator>( const TBint& lhs, const TBint& rhs );
+    friend bool operator!=( const TBint& lhs, const TBint& rhs );
     friend bool operator<=( const TBint& lhs, const TBint& rhs );
     friend bool operator>=( const TBint& lhs, const TBint& rhs );
 
