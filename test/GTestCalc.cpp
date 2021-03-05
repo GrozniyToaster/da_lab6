@@ -60,21 +60,72 @@ TEST(eq, simple) {
     bint_t a = 100000;
     bint_t b = static_cast<NBigInt::bint_t>("100000");
     ASSERT_EQ(a, b);
+    ASSERT_EQ(a, 100000);
 }
 
 TEST(ne, simple) {
     bint_t a = 1000001;
     bint_t b = static_cast<NBigInt::bint_t>("100000");
     ASSERT_NE(a, b);
+    ASSERT_NE(a, 1000000);
 }
+
+TEST(streams, io){
+    std::stringstream i,o;
+    bint_t a;
+    std::string f = "123456789", s = "98765432";
+    i << f << ' ' << s;
+    i >> a;
+    o << a << ' ';
+    i >> a;
+    o << a;
+    ASSERT_EQ(o.str(), f + ' ' + s );
+}
+
+TEST(gtlt, all){
+    bint_t a ( "55555555555555" );
+    EXPECT_GT(a, 100);
+    EXPECT_LT(100, a);
+    bint_t b ( "44444444444444" );
+    EXPECT_GT(a, b);
+    EXPECT_LT(b, a);
+}
+/*
+TEST(div, all){
+    bint_t a ( "55555555555555" );
+    EXPECT_THROW( b / 0, std::exception );
+ }
+
+TEST(multiply, all){
+    bint_t a ( "55555555555555" );
+    ASSERT_EQ(a * 0, 0 * a);
+    ASSERT_EQ(a * 1, 1 * a);
+    EXPECT_EQ(a * 5, static_cast<bint_t>("277777777777775"));
+    EXPECT_EQ(a * a, static_cast<bint_t>("3086419753086358024691358025"));
+}
+
+TEST(pow, all){
+    bint_t a ( "55555555555555" );
+    ASSERT_EQ(a ^ 0, 1);
+    ASSERT_EQ(0 ^ a, 1);
+    ASSERT_EQ(0 ^ 0, 1);
+    ASSERT_EQ(1 ^ a, 1);
+    ASSERT_EQ(a ^ 1, a);
+    EXPECT_EQ(a ^ 5, static_cast<bint_t>("529221494013419998645192975854798557130513429524632085243822926721875"));
+    bint_t b = 55;
+    EXPECT_EQ(b^b, static_cast<bint_t>("524744532468751923546122657597368049278513737089035272057324643668607677682302892208099365234375"));
+}
+*/
+
 
 TEST(zerroes, emty){
     bint_t a;
     bint_t z = 0;
-
     ASSERT_EQ(z, a);
     ASSERT_EQ(0, a);
     a = static_cast<bint_t> ("0");
+    ASSERT_EQ(0, a);
+    a = static_cast<bint_t> ("");
     ASSERT_EQ(0, a);
     a = 0;
     ASSERT_EQ(0, a);

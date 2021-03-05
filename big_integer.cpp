@@ -84,7 +84,6 @@ namespace NBigInt {
     }
 
     TBint &TBint::operator-=(const TBint &rhs) {
-        // TODO exeption tl? preproc define
 #ifdef EXCEPTION_OPT
         if ( *this < rhs ){
             throw std::underflow_error("lhs less then rhs");
@@ -121,7 +120,7 @@ namespace NBigInt {
         if (lhs.Data.size() != rhs.Data.size()) {
             return lhs.Data.size() < rhs.Data.size();
         }
-        for (int i = lhs.Data.size(); i > 0; --i) {
+        for (int i = lhs.Data.size() - 1; i > 0; --i) {
             if (lhs.Data[i] != rhs.Data[i]) {
                 return lhs.Data[i] < rhs.Data[i];
             }
@@ -133,7 +132,7 @@ namespace NBigInt {
         if (lhs.Data.size() != rhs.Data.size()) {
             return lhs.Data.size() > rhs.Data.size();
         }
-        for (int i = lhs.Data.size(); i > 0; --i) {
+        for (int i = lhs.Data.size() - 1; i > 0; --i) {
             if (lhs.Data[i] != rhs.Data[i]) {
                 return lhs.Data[i] > rhs.Data[i];
             }

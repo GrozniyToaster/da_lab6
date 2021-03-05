@@ -26,7 +26,6 @@ class TBint{
     explicit TBint(const std::string&);
     TBint(int64_t);
 
-
     ~TBint() = default;
 
     TBint& operator=(const TBint& rhs) = default;
@@ -38,15 +37,13 @@ class TBint{
     friend TBint operator+( const TBint& lhs, const TBint& rhs);
     friend TBint operator-( const TBint& lhs, const TBint& rhs);
     friend std::istream& operator>>(std::istream& is, TBint& rhs);
-    friend std::ostream& operator<<(std::ostream& os,const TBint& rhs);
+    friend std::ostream& operator<<(std::ostream& os, const TBint& rhs);
     friend bool operator<( const TBint& lhs, const TBint& rhs );
-    friend bool operator==( const TBint& lhs, const TBint& rhs );
     friend bool operator>( const TBint& lhs, const TBint& rhs );
+    friend bool operator==( const TBint& lhs, const TBint& rhs );
     friend bool operator!=( const TBint& lhs, const TBint& rhs );
     friend bool operator<=( const TBint& lhs, const TBint& rhs );
     friend bool operator>=( const TBint& lhs, const TBint& rhs );
-
-
 
 };
 
