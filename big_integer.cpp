@@ -45,7 +45,6 @@ namespace NBigInt {
                 this->Data[i] += rhs.Data[i];
             }
             //TODO смотреть на что не переполняется в отрицательное
-
             overflow = this->Data[i] / TBint::Base;
             this->Data[i] = this->Data[i] % TBint::Base;
         }
@@ -85,7 +84,12 @@ namespace NBigInt {
     }
 
     TBint &TBint::operator-=(const TBint &rhs) {
-        // TODO exeption
+        // TODO exeption tl? preproc define
+#ifdef EXCEPTION_OPT
+        if ( *this < rhs ){
+            throw std::underflow_error("lhs less then rhs");
+        }
+#endif
         size_t lSize = this->Data.size(), rSize = rhs.Data.size();
         int m = std::max(lSize, rSize);
         this->Data.resize(m + 1, 0);

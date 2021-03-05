@@ -6,6 +6,8 @@
 #include <iterator>
 #include <iomanip>
 
+#define EXCEPTION_OPT //if define enable throwing exception in diff div etc (comment to off)
+
 namespace NBigInt{
     template <typename Iterator>
     int64_t StrToll( Iterator i, Iterator end);
