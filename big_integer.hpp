@@ -16,16 +16,19 @@ class TBint{
     static const int Radix = 2;
     std::vector<int64_t> Data;
 
-    void DeleteLeadingZeroes();
+    void DeleteLeadingZeroes() noexcept;
   public:
     TBint() = default;
+    TBint(const TBint& rhs) = default;
+    TBint(TBint&& rhs) noexcept;
     explicit TBint(const std::string&);
     TBint(int64_t);
 
 
     ~TBint() = default;
 
-
+    TBint& operator=(const TBint& rhs) = default;
+    TBint& operator=(TBint&& rhs) noexcept;
     TBint& operator+=(const TBint& rhs);
     TBint& operator-=(const TBint& rhs);
     operator std::string() const;

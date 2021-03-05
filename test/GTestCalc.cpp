@@ -46,7 +46,7 @@ TEST(zerroes, emty){
 TEST(deconstructs, simple){
     NBigInt::bint_t a;
     std::stringstream ss;
-    ss << "123456";
+    ss << "123456 ";
     ss >> a;
     ss << "77777";
     ss >> a;
