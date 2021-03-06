@@ -242,11 +242,11 @@ namespace NBigInt {
         size_t n = std::max(lSize, rSize);
         n = ClosestPower2(n);
         if ( n > TBint::KARATSUBA_NUMBER ){
-            auto l = const_cast<TBint&>(lhs); // It is bad, but ClosestPower2 guarantees that n >= old size
-            auto r = const_cast<TBint&>(rhs);
+            auto& l = const_cast<TBint&>(lhs); // It is bad, but ClosestPower2 guarantees that n >= old size
+            auto& r = const_cast<TBint&>(rhs);
             l.Data.resize(n, 0);
             r.Data.resize(n, 0);
-            res.Data = TBint::KaratsubaMul( lhs.Data, rhs.Data );
+            res.Data = TBint::KaratsubaMul( lhs.Data, rhs.Data ); // KaratsubaMul guarantees that l, r are const
         }else{
             res.Data = TBint::NaiveMul( lhs.Data, rhs.Data );
         }
