@@ -70,4 +70,29 @@ class TBint{
         }
         return res;
     }
+ template<typename T>
+ class TVectorWatcher{
+   private:
+     std::vector<T>& v;
+     int begin = 0, end = v.size();
+   public:
+     TVectorWatcher() = delete;
+     template<class U>
+     TVectorWatcher( TVectorWatcher<U> ) = delete;
+     template<class U>
+     TVectorWatcher( TVectorWatcher<U>&& ) = delete;
+
+     TVectorWatcher( std::vector<T>& v ): v(v){}
+     TVectorWatcher( std::vector<T>& v, int start, int end ): v(v), begin(start), end(end) {}
+
+     ~TVectorWatcher() = default;
+
+     TVectorWatcher& operator=(TVectorWatcher& ) = delete;
+     TVectorWatcher& operator=(TVectorWatcher&& rhs) = delete;
+     inline const T& operator[]( size_t pos ) const noexcept { return this->v[begin + pos]; }
+     inline int Size() const noexcept { return (this->end - this->begin); }
+     inline int Begin() const noexcept { return this->begin; }
+     inline int End() const noexcept { return this->end; }
+
+};
 }
