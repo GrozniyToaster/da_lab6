@@ -32,10 +32,12 @@ class TBint{
     TBint& operator=(TBint&& rhs) noexcept;
     TBint& operator+=(const TBint& rhs);
     TBint& operator-=(const TBint& rhs);
+    TBint& operator*=(const TBint& rhs);
     operator std::string() const;
 
     friend TBint operator+( const TBint& lhs, const TBint& rhs);
     friend TBint operator-( const TBint& lhs, const TBint& rhs);
+    friend TBint operator*( const TBint& lhs, const TBint& rhs);
     friend std::istream& operator>>(std::istream& is, TBint& rhs);
     friend std::ostream& operator<<(std::ostream& os, const TBint& rhs);
     friend bool operator<( const TBint& lhs, const TBint& rhs );

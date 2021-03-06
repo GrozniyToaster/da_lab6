@@ -180,6 +180,7 @@ namespace NBigInt {
 
     TBint::TBint(TBint &&rhs) noexcept {
         this->Data.swap(rhs.Data);
+        this->DeleteLeadingZeroes();
     }
 
     TBint &TBint::operator=(TBint &&rhs) noexcept {
@@ -187,7 +188,62 @@ namespace NBigInt {
             return *this;
         }
         this->Data.swap(rhs.Data);
+        this->DeleteLeadingZeroes();
         return *this;
+    }
+
+    TBint &TBint::operator*=(const TBint &rhs) {
+        TBint zero;
+        if ( *this == zero || rhs == zero ){
+            *this = std::move(zero);
+            return *this;
+        }
+        TBint one (1);
+        if (*this == one){
+            *this = rhs;
+            return *this;
+        } else if ( rhs == one ){
+            return *this;
+        }
+        size_t tSize = this->Data.size(), rSize = rhs.Data.size();
+        std::vector<int64_t> res (tSize + rSize, 0);
+        for (int i = 0; i < tSize; ++i){
+            int64_t overflow = 0;
+            for(int j = 0; j < rSize; ++j){
+                res[i + j] += overflow + this->Data[i] * rhs.Data[j];
+                overflow = res[i + j] / TBint::Base;
+                res[i + j] %= TBint::Base;
+            }
+            res[i + rSize] += overflow;
+        }
+        this->Data = std::move(res);
+        return *this;
+    }
+
+    TBint operator*(const TBint &lhs, const TBint &rhs) {
+        TBint zero;
+        if ( lhs == zero || rhs == zero ){
+            return zero;
+        }
+        TBint one (1);
+        if (rhs == one){
+            return lhs;
+        } else if ( lhs == one ){
+            return rhs;
+        }
+        size_t lSize = lhs.Data.size(), rSize = rhs.Data.size();
+        TBint res;
+        res.Data.resize(lSize + rSize, 0);
+        for (int i = 0; i < lSize; ++i){
+            int64_t overflow = 0;
+            for(int j = 0; j < rSize; ++j){
+                res.Data[i + j] += overflow + lhs.Data[i] * rhs.Data[j];
+                overflow = res.Data[i + j] / TBint::Base;
+                res.Data[i + j] %= TBint::Base;
+            }
+            res.Data[i + rSize] += overflow;
+        }
+        return res;
     }
 
 

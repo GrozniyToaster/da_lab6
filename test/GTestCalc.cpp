@@ -90,11 +90,6 @@ TEST(gtlt, all){
     EXPECT_GT(a, b);
     EXPECT_LT(b, a);
 }
-/*
-TEST(div, all){
-    bint_t a ( "55555555555555" );
-    EXPECT_THROW( b / 0, std::exception );
- }
 
 TEST(multiply, all){
     bint_t a ( "55555555555555" );
@@ -103,6 +98,14 @@ TEST(multiply, all){
     EXPECT_EQ(a * 5, static_cast<bint_t>("277777777777775"));
     EXPECT_EQ(a * a, static_cast<bint_t>("3086419753086358024691358025"));
 }
+
+/*
+TEST(div, all){
+    bint_t a ( "55555555555555" );
+    EXPECT_THROW( b / 0, std::exception );
+ }
+
+
 
 TEST(pow, all){
     bint_t a ( "55555555555555" );
