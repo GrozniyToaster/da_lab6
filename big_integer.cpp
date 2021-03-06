@@ -41,7 +41,7 @@ namespace NBigInt {
     }
 
     TBint &TBint::operator+=(const TBint &rhs) {
-        size_t lSize = this->Data.size(), rSize = rhs.Data.size();
+        int lSize = this->Data.size(), rSize = rhs.Data.size();
         int m = std::max(lSize, rSize);
         this->Data.resize(m, 0);
         int64_t overflow = 0;
@@ -76,7 +76,7 @@ namespace NBigInt {
         rhs.Data.swap(newBInt.Data);
         return is;
     }
-
+// FIXME 11 -> 110
     std::ostream &operator<<(std::ostream &os, const TBint &rhs) {
         if (rhs.Data.empty()) {
             os << '0';
@@ -95,7 +95,7 @@ namespace NBigInt {
             throw std::underflow_error("lhs less then rhs");
         }
 #endif
-        size_t lSize = this->Data.size(), rSize = rhs.Data.size();
+        int lSize = this->Data.size(), rSize = rhs.Data.size();
         int m = std::max(lSize, rSize);
         this->Data.resize(m + 1, 0);
         int64_t underflow = 0;
@@ -147,10 +147,11 @@ namespace NBigInt {
     }
 
     bool operator==(const TBint &lhs, const TBint &rhs) {
-        if (lhs.Data.size() != rhs.Data.size()) {
+        int lSize = lhs.Data.size(), rSize = rhs.Data.size();
+        if (lSize != rSize) {
             return false;
         }
-        for (int i = 0; i < lhs.Data.size(); i++) {
+        for (int i = 0; i < lSize; i++) {
             if (lhs.Data[i] != rhs.Data[i]) {
                 return false;
             }
@@ -232,11 +233,11 @@ namespace NBigInt {
     }
 
     std::vector<int64_t> TBint::NaiveMul(const TVectorWatcher <int64_t> &rhs, const TVectorWatcher <int64_t> &lhs) {
-        size_t lSize = rhs.Size(), rSize = lhs.Size();
+        auto lSize = rhs.Size(), rSize = lhs.Size();
         std::vector<int64_t> res;
         res.resize(lSize + rSize, 0);
-        for (int i = 0; i < lSize; ++i){
-            for(int j = 0; j < rSize; ++j){
+        for (auto i = 0; i < lSize; ++i){
+            for(auto j = 0; j < rSize; ++j){
                 res[i + j] += rhs[i] * lhs[j];
             }
         }
@@ -245,7 +246,7 @@ namespace NBigInt {
 
     void TBint::Finalize(std::vector<int64_t> &res){
         int64_t overflow = 0;
-        for (int i = 0; i < res.size(); ++i){
+        for (size_t i = 0; i < res.size(); ++i){
             res[i] += overflow;
             overflow = res[i] / TBint::BASE;
             res[i] %= TBint::BASE;
@@ -256,13 +257,13 @@ namespace NBigInt {
     }
 
     std::vector<int64_t> TBint::KaratsubaMul(const TVectorWatcher <int64_t> &x, const TVectorWatcher <int64_t> &y) {
-        size_t n = x.Size();
+        int n = x.Size();
         if (n <= TBint::KARATSUBA_NUMBER){
             auto res = TBint::NaiveMul(x,y);
             res.resize(2*n,0);
             return res;
         }
-        size_t k = n >> 1; // analog n / 2;
+        int k = n >> 1; // analog n / 2;
         std::vector<int64_t> res (n * 2);
 
 
@@ -277,22 +278,22 @@ namespace NBigInt {
         std::vector<int64_t> xlr(k);
         std::vector<int64_t> ylr(k);
 
-        for (int i = 0; i < k; ++i) {
+        for (auto i = 0; i < k; ++i) {
             xlr[i] = xl[i] + xr[i];
             ylr[i] = yl[i] + yr[i];
         }
 
         std::vector<int64_t> p3 = TBint::KaratsubaMul(xlr, ylr);
-        for (int i = 0; i < n; ++i) {
+        for (auto i = 0; i < n; ++i) {
             p3[i] -= p2[i] + p1[i];
         }
-        for (int i = 0; i < n; ++i) {
+        for (auto i = 0; i < n; ++i) {
             res[i] = p2[i];
         }
-        for (int i = n; i < 2 * n; ++i) {
+        for (auto i = n; i < 2 * n; ++i) {
             res[i] = p1[i - n];
         }
-        for (int i = k; i < n + k; ++i) {
+        for (auto i = k; i < n + k; ++i) {
             res[i] += p3[i - k];
         }
         return res;
@@ -300,9 +301,8 @@ namespace NBigInt {
     }
 
     TBint TBint::ChooseVersionOfMul(const TBint &lhs, const TBint &rhs) {
-        size_t lSize = lhs.Data.size(), rSize = rhs.Data.size();
         TBint res;
-        size_t n = std::max(lSize, rSize);
+        size_t n = std::max(lhs.Data.size(), rhs.Data.size());
         n = ClosestPower2(n);
         if ( n > TBint::KARATSUBA_NUMBER ){
             auto& l = const_cast<TBint&>(lhs); // It is bad, but ClosestPower2 guarantees that n >= old size
@@ -316,6 +316,145 @@ namespace NBigInt {
         TBint::Finalize(res.Data);
         res.DeleteLeadingZeroes();
         return res;
+    }
+
+    TBint &TBint::operator/=(const TBint &rhs) {
+        TBint zero;
+#ifdef EXCEPTION_OPT
+        if ( rhs == zero ){
+            throw std::underflow_error("Deviation by zero");
+        }
+#endif
+        if (*this == zero){
+            return  *this;
+        }
+        TBint one (1);
+        if (rhs == one){
+            return *this;
+        }else if (*this < rhs ){
+            *this = std::move(zero);
+            return *this;
+        }else if ( *this == rhs ){
+            *this = std::move(one);
+            return *this;
+        }
+        *this = TBint::LongDivWay( *this, rhs );
+        return *this;
+    }
+
+    TBint operator/(const TBint &lhs, const TBint &rhs) {
+        TBint zero;
+#ifdef EXCEPTION_OPT
+        if ( rhs == zero ){
+            throw std::underflow_error("Deviation by zero");
+        }
+#endif
+        if (lhs == zero){
+            return  lhs;
+        }
+        TBint one (1);
+        if (rhs == one){
+            return lhs;
+        }else if (lhs < rhs ){
+            return zero;
+        }else if ( lhs == rhs ){
+            return one;
+        }
+        TBint res = TBint::LongDivWay( lhs, rhs );
+        return res;
+    }
+
+    TBint TBint::LongDivWay(const TBint &lhs, const TBint &rhs) {
+        std::vector<TBint> preCalculate;
+        preCalculate.reserve(TBint::BASE);
+        preCalculate.push_back(0);
+        preCalculate.push_back(rhs);
+        TBint tmp = rhs;
+        for ( int i = 2; i < TBint::BASE; ++i ){
+            tmp += rhs;
+            preCalculate.push_back(tmp);
+        }
+        int lSize = lhs.Data.size(), rSize = rhs.Data.size();
+        std::vector<int64_t> ost;
+        ost.resize(rSize);
+        for (auto i = 1; i <= rSize; ++i ){
+            ost[i - 1] = lhs.Data[lSize - i];
+        }
+
+        std::vector<int64_t> preRes;
+        preRes.reserve( lSize >> 1 ); // reserve lSize/2 memory
+        //TODO проверить граници и разряды
+        for (int i = rSize; i <= lSize; ++i ){
+            int fraction = TBint::BinSearchHelper(ost, preCalculate);
+            //FIXME
+            TBint::DiffHelper(ost, preCalculate[fraction] );
+            //ost -= preCalculate[fraction];
+            preRes.push_back(fraction);
+            ost.push_back(lhs.Data[lSize - i - 1]);
+        }
+        TBint res;
+        res.Data.reserve(preRes.size());
+        int leadingZero = 0;
+        while (preRes[leadingZero] == 0){
+            ++leadingZero;
+        }
+
+        for (int i  = preRes.size() - 1; i >= leadingZero; --i){
+            res.Data.push_back(preRes[i]);
+        }
+        res.DeleteLeadingZeroes();
+        return res;
+    }
+
+    int64_t TBint::BinSearchHelper(const std::vector<int64_t> &ost, const std::vector<TBint> &preCalculated) {
+        int l = 0, r = TBint::BASE;
+        while (r - 1 > l){
+            int m = (r + l) >> 1; // analog (r + l) / 2
+            if ( TBint::LessHelper( ost, preCalculated[m] ) ){
+                r = m;
+            }else{
+                l = m;
+            }
+        }
+        int64_t res = (r + l) >> 1;
+        return res;
+    }
+
+    inline bool TBint::LessHelper(const std::vector<int64_t> &ost, const TBint &toCheck) {
+        size_t tcSize = toCheck.Data.size();
+        if (ost.size() != tcSize){
+            return ost.size() < tcSize;
+        }
+        for (size_t i = 0; i < tcSize; ++i){
+            if (ost[i] != toCheck.Data[tcSize - i - 1]){
+                return ost[i] < toCheck.Data[tcSize - i - 1];
+            }
+        }
+        return false;
+    }
+
+    void TBint::DiffHelper(std::vector<int64_t>& ost, const TBint& diff) {
+        int lSize = ost.size(), rSize = diff.Data.size();
+        int m = std::min(lSize, rSize);
+        int64_t underflow = 0;
+        for (int i = 0; i < m; ++i) {
+            ost[lSize - i - 1] -= underflow;
+            underflow = 0;
+            if (i < rSize) {
+                ost[lSize - i - 1] -= diff.Data[i];
+            }
+            if (ost[lSize - i - 1] < 0) {
+                underflow = 1;
+                ost[lSize - i - 1] += TBint::BASE;
+            }
+            ost[lSize - i - 1] = ost[lSize - i - 1] % TBint::BASE;
+        }
+        size_t i = 0;
+        while (ost[i] == 0 && i < ost.size()){
+            ++i;
+        }
+        int firstNonZero = i;
+        ost.erase(ost.begin(), ost.begin() + firstNonZero);
     }
 
 

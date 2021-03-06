@@ -102,14 +102,20 @@ TEST(multiply, all){
     EXPECT_EQ(a, static_cast<bint_t>("3086419753086358024691358025"));
 }
 
-/*
 TEST(div, all){
     bint_t a ( "55555555555555" );
-    EXPECT_THROW( b / 0, std::exception );
+    EXPECT_THROW( a / 0, std::exception );
+    EXPECT_EQ( 0, 0 / a);
+    EXPECT_EQ( 0, 1 / a);
+    EXPECT_EQ( a, a / 1);
+    EXPECT_EQ(a / 5, static_cast<bint_t>("11111111111111"));
+    bint_t b = 121;
+    EXPECT_EQ(b / 11, 11);
  }
 
 
 
+ /*
 TEST(pow, all){
     bint_t a ( "55555555555555" );
     ASSERT_EQ(a ^ 0, 1);

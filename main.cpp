@@ -28,7 +28,8 @@ int main(){
                std::cout << "Error\n";
                continue;
             }
-//            std::cout << a / b << '\n';
+            auto res = a / b;
+            std::cout << res << '\n';
         }else if(action == '*'){
             std::cout << a * b << '\n';
         }else if(action == '^'){

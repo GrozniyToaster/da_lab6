@@ -13,6 +13,7 @@ namespace NBigInt{
     int64_t StrToll( Iterator i, Iterator end);
 
     uint ClosestPower2( uint a );
+
     template<typename T>
     class TVectorWatcher{
     public:
@@ -44,10 +45,16 @@ class TBint{
     std::vector<int64_t> Data;
 
     void DeleteLeadingZeroes() noexcept;
-    static TBint ChooseVersionOfMul(  const TBint& lhs, const TBint& rhs );
+
+    static TBint ChooseVersionOfMul(const TBint& lhs, const TBint& rhs);
     static std::vector<int64_t> NaiveMul(const TVectorWatcher <int64_t> &rhs, const TVectorWatcher <int64_t> &lhs);
     static std::vector<int64_t> KaratsubaMul(const TVectorWatcher <int64_t> &x, const TVectorWatcher <int64_t> &y);
     static void Finalize(std::vector<int64_t>& res);
+
+    static TBint LongDivWay(const TBint& lhs, const TBint& rhs);
+    static int64_t BinSearchHelper(const std::vector<int64_t> &ost, const std::vector<TBint> &preCalculated);
+    static bool LessHelper(const std::vector<int64_t>& ost, const TBint& toCheck);
+    static void DiffHelper(std::vector<int64_t>& ost, const TBint& diff);
   public:
     TBint() = default;
     TBint(const TBint& rhs) = default;
@@ -62,11 +69,13 @@ class TBint{
     TBint& operator+=(const TBint& rhs);
     TBint& operator-=(const TBint& rhs);
     TBint& operator*=(const TBint& rhs);
+    TBint& operator/=(const TBint& rhs);
     operator std::string() const;
 
-    friend TBint operator+( const TBint& lhs, const TBint& rhs);
-    friend TBint operator-( const TBint& lhs, const TBint& rhs);
-    friend TBint operator*( const TBint& lhs, const TBint& rhs);
+    friend TBint operator+(const TBint& lhs, const TBint& rhs);
+    friend TBint operator-(const TBint& lhs, const TBint& rhs);
+    friend TBint operator*(const TBint& lhs, const TBint& rhs);
+    friend TBint operator/(const TBint& lhs, const TBint& rhs);
     friend std::istream& operator>>(std::istream& is, TBint& rhs);
     friend std::ostream& operator<<(std::ostream& os, const TBint& rhs);
     friend bool operator<( const TBint& lhs, const TBint& rhs );
