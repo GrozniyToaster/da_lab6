@@ -13,6 +13,28 @@ namespace NBigInt{
     int64_t StrToll( Iterator i, Iterator end);
 
     uint ClosestPower2( uint a );
+    template<typename T>
+    class TVectorWatcher{
+    public:
+        const std::vector<T>& v;
+        const int begin = 0, end = v.size();
+
+        TVectorWatcher() = delete;
+        template<class U>
+        TVectorWatcher( TVectorWatcher<U> ) = delete;
+        template<class U>
+        TVectorWatcher( TVectorWatcher<U>&& ) = delete;
+
+        TVectorWatcher( const std::vector<T>& v ): v(v){}
+        TVectorWatcher( const std::vector<T>& v, int start, int end ): v(v), begin(start), end(end) {}
+
+        ~TVectorWatcher() = default;
+
+        TVectorWatcher& operator=(TVectorWatcher& ) = delete;
+        TVectorWatcher& operator=(TVectorWatcher&& rhs) = delete;
+        inline const T& operator[]( size_t pos ) const noexcept { return this->v[begin + pos]; }
+        inline int Size() const noexcept { return (this->end - this->begin); }
+    };
 
 class TBint{
   private:  
@@ -23,8 +45,8 @@ class TBint{
 
     void DeleteLeadingZeroes() noexcept;
     static TBint ChooseVersionOfMul(  const TBint& lhs, const TBint& rhs );
-    static std::vector<int64_t> NaiveMul(const std::vector<int64_t>& rhs, const std::vector<int64_t>& lhs);
-    static std::vector<int64_t> KaratsubaMul(const std::vector<int64_t>& x, const std::vector<int64_t>& y);
+    static std::vector<int64_t> NaiveMul(const TVectorWatcher <int64_t> &rhs, const TVectorWatcher <int64_t> &lhs);
+    static std::vector<int64_t> KaratsubaMul(const TVectorWatcher <int64_t> &x, const TVectorWatcher <int64_t> &y);
     static void Finalize(std::vector<int64_t>& res);
   public:
     TBint() = default;
@@ -70,29 +92,5 @@ class TBint{
         }
         return res;
     }
- template<typename T>
- class TVectorWatcher{
-   private:
-     std::vector<T>& v;
-     int begin = 0, end = v.size();
-   public:
-     TVectorWatcher() = delete;
-     template<class U>
-     TVectorWatcher( TVectorWatcher<U> ) = delete;
-     template<class U>
-     TVectorWatcher( TVectorWatcher<U>&& ) = delete;
 
-     TVectorWatcher( std::vector<T>& v ): v(v){}
-     TVectorWatcher( std::vector<T>& v, int start, int end ): v(v), begin(start), end(end) {}
-
-     ~TVectorWatcher() = default;
-
-     TVectorWatcher& operator=(TVectorWatcher& ) = delete;
-     TVectorWatcher& operator=(TVectorWatcher&& rhs) = delete;
-     inline const T& operator[]( size_t pos ) const noexcept { return this->v[begin + pos]; }
-     inline int Size() const noexcept { return (this->end - this->begin); }
-     inline int Begin() const noexcept { return this->begin; }
-     inline int End() const noexcept { return this->end; }
-
-};
 }

@@ -231,8 +231,8 @@ namespace NBigInt {
 
     }
 
-    std::vector<int64_t> TBint::NaiveMul(const std::vector<int64_t> &rhs, const std::vector<int64_t> &lhs) {
-        size_t lSize = rhs.size(), rSize = lhs.size();
+    std::vector<int64_t> TBint::NaiveMul(const TVectorWatcher <int64_t> &rhs, const TVectorWatcher <int64_t> &lhs) {
+        size_t lSize = rhs.Size(), rSize = lhs.Size();
         std::vector<int64_t> res;
         res.resize(lSize + rSize, 0);
         for (int i = 0; i < lSize; ++i){
@@ -255,8 +255,8 @@ namespace NBigInt {
         }
     }
 
-    std::vector<int64_t> TBint::KaratsubaMul(const std::vector<int64_t> &x, const std::vector<int64_t> &y) {
-        size_t n = x.size();
+    std::vector<int64_t> TBint::KaratsubaMul(const TVectorWatcher <int64_t> &x, const TVectorWatcher <int64_t> &y) {
+        size_t n = x.Size();
         if (n <= TBint::KARATSUBA_NUMBER){
             auto res = TBint::NaiveMul(x,y);
             res.resize(2*n,0);
@@ -266,10 +266,10 @@ namespace NBigInt {
         std::vector<int64_t> res (n * 2);
 
 
-        std::vector<int64_t> xr {x.begin(), x.begin() + k};
-        std::vector<int64_t> xl {x.begin() + k, x.end()};
-        std::vector<int64_t> yr {y.begin(), y.begin() + k};
-        std::vector<int64_t> yl {y.begin() + k, y.end()};
+        TVectorWatcher<int64_t> xr (x.v, x.begin, x.begin + k);
+        TVectorWatcher<int64_t> xl (x.v, x.begin + k, x.end);
+        TVectorWatcher<int64_t> yr (y.v, y.begin, y.begin + k);
+        TVectorWatcher<int64_t> yl (y.v, y.begin + k, y.end);
 
         std::vector<int64_t> p1 = TBint::KaratsubaMul(xl, yl);
         std::vector<int64_t> p2 = TBint::KaratsubaMul(xr, yr);
@@ -281,21 +281,18 @@ namespace NBigInt {
             xlr[i] = xl[i] + xr[i];
             ylr[i] = yl[i] + yr[i];
         }
-        std::vector<int64_t> p3 = TBint::KaratsubaMul(xlr, ylr);
 
-        for (auto i = 0; i < n; ++i) {
+        std::vector<int64_t> p3 = TBint::KaratsubaMul(xlr, ylr);
+        for (int i = 0; i < n; ++i) {
             p3[i] -= p2[i] + p1[i];
         }
-
-        for (auto i = 0; i < n; ++i) {
+        for (int i = 0; i < n; ++i) {
             res[i] = p2[i];
         }
-
-        for (auto i = n; i < 2 * n; ++i) {
+        for (int i = n; i < 2 * n; ++i) {
             res[i] = p1[i - n];
         }
-
-        for (auto i = k; i < n + k; ++i) {
+        for (int i = k; i < n + k; ++i) {
             res[i] += p3[i - k];
         }
         return res;
