@@ -211,18 +211,7 @@ namespace NBigInt {
         } else if ( rhs == one ){
             return *this;
         }
-        size_t tSize = this->Data.size(), rSize = rhs.Data.size();
-        std::vector<int64_t> res (tSize + rSize, 0);
-        for (int i = 0; i < tSize; ++i){
-            int64_t overflow = 0;
-            for(int j = 0; j < rSize; ++j){
-                res[i + j] += overflow + this->Data[i] * rhs.Data[j];
-                overflow = res[i + j] / TBint::BASE;
-                res[i + j] %= TBint::BASE;
-            }
-            res[i + rSize] += overflow;
-        }
-        this->Data = std::move(res);
+        *this = TBint::ChooseVersionOfMul( *this, rhs );
         return *this;
     }
 
@@ -237,35 +226,9 @@ namespace NBigInt {
         } else if ( lhs == one ){
             return rhs;
         }
-        size_t lSize = lhs.Data.size(), rSize = rhs.Data.size();
-        TBint res;
-        size_t n = std::max(lSize, rSize);
-        n = ClosestPower2(n);
-        if ( n > TBint::KARATSUBA_NUMBER ){
-            auto& l = const_cast<TBint&>(lhs); // It is bad, but ClosestPower2 guarantees that n >= old size
-            auto& r = const_cast<TBint&>(rhs);
-            l.Data.resize(n, 0);
-            r.Data.resize(n, 0);
-            res.Data = TBint::KaratsubaMul( lhs.Data, rhs.Data ); // KaratsubaMul guarantees that l, r are const
-        }else{
-            res.Data = TBint::NaiveMul( lhs.Data, rhs.Data );
-        }
-        TBint::Finalize(res.Data);
-        res.DeleteLeadingZeroes();
+        TBint res = TBint::ChooseVersionOfMul(lhs, rhs);
         return res;
-        /*
-        res.Data.resize(lSize + rSize, 0);
-        for (int i = 0; i < lSize; ++i){
-            int64_t overflow = 0;
-            for(int j = 0; j < rSize; ++j){
-                res.Data[i + j] += overflow + lhs.Data[i] * rhs.Data[j];
-                overflow = res.Data[i + j] / TBint::BASE;
-                res.Data[i + j] %= TBint::BASE;
-            }
-            res.Data[i + rSize] += overflow;
-        }
-        return res;
-         */
+
     }
 
     std::vector<int64_t> TBint::NaiveMul(const std::vector<int64_t> &rhs, const std::vector<int64_t> &lhs) {
@@ -293,7 +256,69 @@ namespace NBigInt {
     }
 
     std::vector<int64_t> TBint::KaratsubaMul(const std::vector<int64_t> &x, const std::vector<int64_t> &y) {
-        return TBint::NaiveMul(x , y);
+        size_t n = x.size();
+        if (n <= TBint::KARATSUBA_NUMBER){
+            auto res = TBint::NaiveMul(x,y);
+            res.resize(2*n,0);
+            return res;
+        }
+        size_t k = n >> 1; // analog n / 2;
+        std::vector<int64_t> res (n * 2);
+
+
+        std::vector<int64_t> xr {x.begin(), x.begin() + k};
+        std::vector<int64_t> xl {x.begin() + k, x.end()};
+        std::vector<int64_t> yr {y.begin(), y.begin() + k};
+        std::vector<int64_t> yl {y.begin() + k, y.end()};
+
+        std::vector<int64_t> p1 = TBint::KaratsubaMul(xl, yl);
+        std::vector<int64_t> p2 = TBint::KaratsubaMul(xr, yr);
+
+        std::vector<int64_t> xlr(k);
+        std::vector<int64_t> ylr(k);
+
+        for (int i = 0; i < k; ++i) {
+            xlr[i] = xl[i] + xr[i];
+            ylr[i] = yl[i] + yr[i];
+        }
+        std::vector<int64_t> p3 = TBint::KaratsubaMul(xlr, ylr);
+
+        for (auto i = 0; i < n; ++i) {
+            p3[i] -= p2[i] + p1[i];
+        }
+
+        for (auto i = 0; i < n; ++i) {
+            res[i] = p2[i];
+        }
+
+        for (auto i = n; i < 2 * n; ++i) {
+            res[i] = p1[i - n];
+        }
+
+        for (auto i = k; i < n + k; ++i) {
+            res[i] += p3[i - k];
+        }
+        return res;
+
+    }
+
+    TBint TBint::ChooseVersionOfMul(const TBint &lhs, const TBint &rhs) {
+        size_t lSize = lhs.Data.size(), rSize = rhs.Data.size();
+        TBint res;
+        size_t n = std::max(lSize, rSize);
+        n = ClosestPower2(n);
+        if ( n > TBint::KARATSUBA_NUMBER ){
+            auto& l = const_cast<TBint&>(lhs); // It is bad, but ClosestPower2 guarantees that n >= old size
+            auto& r = const_cast<TBint&>(rhs);
+            l.Data.resize(n, 0);
+            r.Data.resize(n, 0);
+            res.Data = TBint::KaratsubaMul( lhs.Data, rhs.Data ); // KaratsubaMul guarantees that lhs, rhs are const
+        }else{
+            res.Data = TBint::NaiveMul( lhs.Data, rhs.Data );
+        }
+        TBint::Finalize(res.Data);
+        res.DeleteLeadingZeroes();
+        return res;
     }
 
 

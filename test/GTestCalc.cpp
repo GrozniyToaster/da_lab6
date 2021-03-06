@@ -98,6 +98,8 @@ TEST(multiply, all){
     ASSERT_EQ(a * 1, a);
     EXPECT_EQ(a * 5, static_cast<bint_t>("277777777777775"));
     EXPECT_EQ(a * a, static_cast<bint_t>("3086419753086358024691358025"));
+    a *= a;
+    EXPECT_EQ(a, static_cast<bint_t>("3086419753086358024691358025"));
 }
 
 /*

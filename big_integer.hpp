@@ -18,10 +18,11 @@ class TBint{
   private:  
     static const int BASE = 100;
     static const int RADIX = 2;
-    static const int KARATSUBA_NUMBER = 128; // the number of digits from which the Karatsuba algorithm begins to work
+    static const int KARATSUBA_NUMBER = 2; // the number of digits from which the Karatsuba algorithm begins to work
     std::vector<int64_t> Data;
 
     void DeleteLeadingZeroes() noexcept;
+    static TBint ChooseVersionOfMul(  const TBint& lhs, const TBint& rhs );
     static std::vector<int64_t> NaiveMul(const std::vector<int64_t>& rhs, const std::vector<int64_t>& lhs);
     static std::vector<int64_t> KaratsubaMul(const std::vector<int64_t>& x, const std::vector<int64_t>& y);
     static void Finalize(std::vector<int64_t>& res);
