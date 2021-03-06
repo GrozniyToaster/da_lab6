@@ -1,27 +1,33 @@
 #include "big_integer.hpp"
 
 namespace NBigInt {
+    uint ClosestPower2( uint a ){
+        while ( a & (a - 1) ){
+            ++a;
+        }
+        return a;
+    }
 
     TBint::TBint(int64_t a) {
-        if (a < TBint::Base) {
+        if (a < TBint::BASE) {
             if (a != 0) {
                 this->Data.push_back(a);
             }
             return;
         }
         do {
-            this->Data.push_back(a % TBint::Base);
-            a /= TBint::Base;
+            this->Data.push_back(a % TBint::BASE);
+            a /= TBint::BASE;
         } while (a > 0);
         this->DeleteLeadingZeroes();
     }
 
     TBint::TBint(const std::string &str) {
-        int newSize = ceil(static_cast<double> (str.size()) / TBint::Radix);
+        int newSize = ceil(static_cast<double> (str.size()) / TBint::RADIX);
         this->Data.resize(newSize);
         auto i = str.rbegin();
         int d = 0;
-        for (auto next = i + TBint::Radix; i < str.rend(); d++, i = next, next = i + TBint::Radix) {
+        for (auto next = i + TBint::RADIX; i < str.rend(); d++, i = next, next = i + TBint::RADIX) {
             auto border = (next >= str.rend()) ? str.rend() : next;
             this->Data[d] = StrToll(border.base(), i.base());
         }
@@ -45,8 +51,8 @@ namespace NBigInt {
                 this->Data[i] += rhs.Data[i];
             }
             //TODO смотреть на что не переполняется в отрицательное
-            overflow = this->Data[i] / TBint::Base;
-            this->Data[i] = this->Data[i] % TBint::Base;
+            overflow = this->Data[i] / TBint::BASE;
+            this->Data[i] = this->Data[i] % TBint::BASE;
         }
         if (overflow) {
             this->Data.push_back(overflow);
@@ -77,7 +83,7 @@ namespace NBigInt {
             return os;
         }
         os << rhs.Data.back();
-        os << std::setfill('0') << std::setw(TBint::Radix);
+        os << std::setfill('0') << std::setw(TBint::RADIX);
         std::copy(rhs.Data.rbegin() + 1, rhs.Data.rend(), std::ostream_iterator<int64_t>(os));
         os << std::resetiosflags(std::ios_base::basefield);
         return os;
@@ -101,9 +107,9 @@ namespace NBigInt {
             }
             if (this->Data[i] < 0) {
                 underflow = 1;
-                this->Data[i] += TBint::Base;
+                this->Data[i] += TBint::BASE;
             }
-            this->Data[i] = this->Data[i] % TBint::Base;
+            this->Data[i] = this->Data[i] % TBint::BASE;
         }
         this->DeleteLeadingZeroes();
 
@@ -167,7 +173,7 @@ namespace NBigInt {
         std::string res = std::to_string(this->Data.back());
         for (auto i = this->Data.size() - 2; i > 0; --i) {
             std::string tmp = std::to_string(this->Data[i]);
-            int leadingZeroes = TBint::Radix - tmp.size();
+            int leadingZeroes = TBint::RADIX - tmp.size();
             res.append(leadingZeroes, '0');
             res += tmp;
         }
@@ -211,8 +217,8 @@ namespace NBigInt {
             int64_t overflow = 0;
             for(int j = 0; j < rSize; ++j){
                 res[i + j] += overflow + this->Data[i] * rhs.Data[j];
-                overflow = res[i + j] / TBint::Base;
-                res[i + j] %= TBint::Base;
+                overflow = res[i + j] / TBint::BASE;
+                res[i + j] %= TBint::BASE;
             }
             res[i + rSize] += overflow;
         }
@@ -233,17 +239,61 @@ namespace NBigInt {
         }
         size_t lSize = lhs.Data.size(), rSize = rhs.Data.size();
         TBint res;
+        size_t n = std::max(lSize, rSize);
+        n = ClosestPower2(n);
+        if ( n > TBint::KARATSUBA_NUMBER ){
+            auto l = const_cast<TBint&>(lhs); // It is bad, but ClosestPower2 guarantees that n >= old size
+            auto r = const_cast<TBint&>(rhs);
+            l.Data.resize(n, 0);
+            r.Data.resize(n, 0);
+            res.Data = TBint::KaratsubaMul( lhs.Data, rhs.Data );
+        }else{
+            res.Data = TBint::NaiveMul( lhs.Data, rhs.Data );
+        }
+        TBint::Finalize(res.Data);
+        res.DeleteLeadingZeroes();
+        return res;
+        /*
         res.Data.resize(lSize + rSize, 0);
         for (int i = 0; i < lSize; ++i){
             int64_t overflow = 0;
             for(int j = 0; j < rSize; ++j){
                 res.Data[i + j] += overflow + lhs.Data[i] * rhs.Data[j];
-                overflow = res.Data[i + j] / TBint::Base;
-                res.Data[i + j] %= TBint::Base;
+                overflow = res.Data[i + j] / TBint::BASE;
+                res.Data[i + j] %= TBint::BASE;
             }
             res.Data[i + rSize] += overflow;
         }
         return res;
+         */
+    }
+
+    std::vector<int64_t> TBint::NaiveMul(const std::vector<int64_t> &rhs, const std::vector<int64_t> &lhs) {
+        size_t lSize = rhs.size(), rSize = lhs.size();
+        std::vector<int64_t> res;
+        res.resize(lSize + rSize, 0);
+        for (int i = 0; i < lSize; ++i){
+            for(int j = 0; j < rSize; ++j){
+                res[i + j] += rhs[i] * lhs[j];
+            }
+        }
+        return res;
+    }
+
+    void TBint::Finalize(std::vector<int64_t> &res){
+        int64_t overflow = 0;
+        for (int i = 0; i < res.size(); ++i){
+            res[i] += overflow;
+            overflow = res[i] / TBint::BASE;
+            res[i] %= TBint::BASE;
+        }
+        if (overflow){
+            res.push_back(overflow);
+        }
+    }
+
+    std::vector<int64_t> TBint::KaratsubaMul(const std::vector<int64_t> &x, const std::vector<int64_t> &y) {
+        return TBint::NaiveMul(x , y);
     }
 
 

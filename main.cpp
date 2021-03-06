@@ -30,7 +30,7 @@ int main(){
             }
 //            std::cout << a / b << '\n';
         }else if(action == '*'){
-//            std::cout << a * b << '\n';
+            std::cout << a * b << '\n';
         }else if(action == '^'){
 //            std::cout << a ^ b << '\n';
         }else{
