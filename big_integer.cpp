@@ -1,8 +1,6 @@
 #include "big_integer.hpp"
 
 namespace NBigInt {
-
-
     TBint::TBint(int64_t a) {
         if (a < TBint::BASE) {
             if (a != 0) {
@@ -20,12 +18,13 @@ namespace NBigInt {
     TBint::TBint(const std::string &str) {
         int newSize = ceil(static_cast<double> (str.size()) / TBint::RADIX);
         this->Data.resize(newSize);
-        auto i = str.rbegin();
+        int i = str.size();
         //TVectorWatcher<std::basic_string, char> pp (str);
         int d = 0;
-        for (auto next = i + TBint::RADIX; i < str.rend(); d++, i = next, next = i + TBint::RADIX) {
-            auto border = (next >= str.rend()) ? str.rend() : next;
-            this->Data[d] = StrToll(border.base(), i.base());
+        for (auto next = i - TBint::RADIX; i > 0; d++, i = next, next = i - TBint::RADIX) {
+            int border = (next <= 0) ? 0 : next;
+            TVectorWatcher<std::basic_string, char> currentSegment (str, border, i);
+            this->Data[d] = StrToll(currentSegment);
         }
         this->DeleteLeadingZeroes();
     }
@@ -444,3 +443,4 @@ namespace NBigInt {
         return res;
     }
 }
+

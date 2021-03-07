@@ -1,5 +1,5 @@
 #pragma once
-
+#include <iostream>
 
 namespace NBigInt{
     template<template <typename, typename... > class Container, typename Type>
@@ -25,22 +25,8 @@ namespace NBigInt{
         inline int Size() const noexcept { return (this->end - this->begin); }
     };
 
-    template <typename Iterator>
-    int64_t StrToll( Iterator i, Iterator end){
-        int64_t res = 0;
-        while ( i != end ){
-            res *= 10;
-            res += static_cast<int64_t>(*i - '0');
-            ++i;
-        }
-        return res;
-    }
+    int64_t StrToll( const TVectorWatcher<std::basic_string, char>& segment);
 
-    inline uint ClosestPower2( uint a ){
-        while ( a & (a - 1) ){
-            ++a;
-        }
-        return a;
-    }
+    uint ClosestPower2( uint a );
 }
 
