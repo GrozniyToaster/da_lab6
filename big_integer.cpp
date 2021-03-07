@@ -21,7 +21,7 @@ namespace NBigInt {
         for ( int rBorder = str.size(), digit = 0; rBorder > 0; rBorder -= TBint::RADIX, ++digit) {
             int nextBorder = rBorder - TBint::RADIX;
             int lBorder = (nextBorder <= 0) ? 0 : nextBorder;
-            TVectorWatcher<std::basic_string, char> curSeg (str, lBorder, rBorder); // Создаем отрезок для перевода
+            TSpan<std::basic_string, char> curSeg (str, lBorder, rBorder); // Создаем отрезок для перевода
             this->Data[digit] = StrToll(curSeg);
         }
         this->DeleteLeadingZeroes();
@@ -227,7 +227,7 @@ namespace NBigInt {
 
     }
 
-    std::vector<int64_t> TBint::NaiveMul(const TVectorWatcher <std::vector, int64_t> &rhs, const TVectorWatcher <std::vector, int64_t> &lhs) {
+    std::vector<int64_t> TBint::NaiveMul(const TSpan <std::vector, int64_t> &rhs, const TSpan <std::vector, int64_t> &lhs) {
         auto lSize = rhs.Size(), rSize = lhs.Size();
         std::vector<int64_t> res;
         res.resize(lSize + rSize, 0);
@@ -251,7 +251,7 @@ namespace NBigInt {
         }
     }
 
-    std::vector<int64_t> TBint::KaratsubaMul(const TVectorWatcher <std::vector, int64_t> &x, const TVectorWatcher <std::vector, int64_t> &y) {
+    std::vector<int64_t> TBint::KaratsubaMul(const TSpan <std::vector, int64_t> &x, const TSpan <std::vector, int64_t> &y) {
         int n = x.Size();
         if (n <= TBint::KARATSUBA_NUMBER){
             auto res = TBint::NaiveMul(x,y);
@@ -262,10 +262,10 @@ namespace NBigInt {
         std::vector<int64_t> res (n * 2);
 
 
-        TVectorWatcher<std::vector, int64_t> xr (x.v, x.begin, x.begin + k);
-        TVectorWatcher<std::vector, int64_t> xl (x.v, x.begin + k, x.end);
-        TVectorWatcher<std::vector, int64_t> yr (y.v, y.begin, y.begin + k);
-        TVectorWatcher<std::vector, int64_t> yl (y.v, y.begin + k, y.end);
+        TSpan<std::vector, int64_t> xr (x.v, x.begin, x.begin + k);
+        TSpan<std::vector, int64_t> xl (x.v, x.begin + k, x.end);
+        TSpan<std::vector, int64_t> yr (y.v, y.begin, y.begin + k);
+        TSpan<std::vector, int64_t> yl (y.v, y.begin + k, y.end);
 
         std::vector<int64_t> p1 = TBint::KaratsubaMul(xl, yl);
         std::vector<int64_t> p2 = TBint::KaratsubaMul(xr, yr);

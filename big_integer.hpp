@@ -19,8 +19,8 @@ class TBint{
     void DeleteLeadingZeroes() noexcept;
 
     static TBint ChooseVersionOfMul(const TBint& lhs, const TBint& rhs);
-    static std::vector<int64_t> NaiveMul(const TVectorWatcher <std::vector, int64_t> &rhs, const TVectorWatcher <std::vector, int64_t> &lhs);
-    static std::vector<int64_t> KaratsubaMul(const TVectorWatcher <std::vector, int64_t> &x, const TVectorWatcher <std::vector, int64_t> &y);
+    static std::vector<int64_t> NaiveMul(const TSpan <std::vector, int64_t> &rhs, const TSpan <std::vector, int64_t> &lhs);
+    static std::vector<int64_t> KaratsubaMul(const TSpan <std::vector, int64_t> &x, const TSpan <std::vector, int64_t> &y);
     static void Finalize(std::vector<int64_t>& res);
 
     static TBint LongDivWay(const TBint& lhs, const TBint& rhs);

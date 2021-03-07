@@ -1,7 +1,7 @@
 #include "big_integer_tools.hpp"
 
 namespace NBigInt{
-    int64_t StrToll( const TVectorWatcher<std::basic_string, char>& segment){
+    int64_t StrToll( const TSpan<std::basic_string, char>& segment){
         int64_t res = 0;
         for (int i = 0; i < segment.Size(); ++i){
             res *= 10;
