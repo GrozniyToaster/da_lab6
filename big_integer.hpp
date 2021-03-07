@@ -6,13 +6,15 @@
 #include <iterator>
 #include <iomanip>
 
-#define EXCEPTION_OPT //if define enable throwing exception in diff div etc (comment to off)
+//#define EXCEPTION_OPT //if define enable throwing exception in diff div etc (uncomment to on)
 
 namespace NBigInt{
     template <typename Iterator>
     int64_t StrToll( Iterator i, Iterator end);
 
     uint ClosestPower2( uint a );
+
+
 
     template<typename T>
     class TVectorWatcher{
@@ -41,7 +43,7 @@ class TBint{
   private:  
     static const int BASE = 100;
     static const int RADIX = 2;
-    static const int KARATSUBA_NUMBER = 2; // the number of digits from which the Karatsuba algorithm begins to work
+    static const int KARATSUBA_NUMBER = 32; // the number of digits from which the Karatsuba algorithm begins to work
     std::vector<int64_t> Data;
 
     void DeleteLeadingZeroes() noexcept;
@@ -53,8 +55,6 @@ class TBint{
 
     static TBint LongDivWay(const TBint& lhs, const TBint& rhs);
     static int64_t BinSearchHelper(const TBint& ost, const std::vector<TBint> &preCalculated);
-    static bool LessHelper(const std::vector<int64_t>& ost, const TBint& toCheck);
-    static void DiffHelper(std::vector<int64_t>& ost, const TBint& diff);
   public:
     TBint() = default;
     TBint(const TBint& rhs) = default;
@@ -70,7 +70,7 @@ class TBint{
     TBint& operator-=(const TBint& rhs);
     TBint& operator*=(const TBint& rhs);
     TBint& operator/=(const TBint& rhs);
-    operator std::string() const;
+    explicit operator std::string() const;
 
     friend TBint operator+(const TBint& lhs, const TBint& rhs);
     friend TBint operator-(const TBint& lhs, const TBint& rhs);
@@ -84,6 +84,7 @@ class TBint{
     friend bool operator!=( const TBint& lhs, const TBint& rhs );
     friend bool operator<=( const TBint& lhs, const TBint& rhs );
     friend bool operator>=( const TBint& lhs, const TBint& rhs );
+    friend TBint pow(TBint a, TBint n);
 
 };
 

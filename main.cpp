@@ -33,7 +33,7 @@ int main(){
         }else if(action == '*'){
             std::cout << a * b << '\n';
         }else if(action == '^'){
-//            std::cout << a ^ b << '\n';
+            std::cout << pow(a, b) << '\n';
         }else{
             std::cout << "Error\n";
         }

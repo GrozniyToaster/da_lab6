@@ -4,6 +4,8 @@
 #include <gtest/gtest.h>
 #include "../big_integer.hpp"
 
+#include <cmath>
+
 using namespace NBigInt;
 TEST(sum, simple_string_construct){
     bint_t a = static_cast<NBigInt::bint_t>("100000");
@@ -35,7 +37,9 @@ TEST(diff, simple){
     bint_t a = 100000;
     bint_t b = 500;
     EXPECT_EQ(99500, a - b);
+#ifdef EXCEPTION_OPT
     EXPECT_THROW( b - a, std::underflow_error );
+#endif
     bint_t c = 10000;
     bint_t d = 9999;
     EXPECT_EQ( c - 1 , d);
@@ -48,7 +52,9 @@ TEST(diff, really_big){
     bint_t b ("444444444444444444444444444");
     bint_t ab("111111111111111111111111111");
     EXPECT_EQ(ab, a - b);
+#ifdef EXCEPTION_OPT
     EXPECT_THROW( b - a, std::underflow_error );
+#endif
     bint_t c ("100000000000000000000000000");
     bint_t d ("99999999999999999999999999");
     EXPECT_EQ( c - 1 , d);
@@ -104,7 +110,9 @@ TEST(multiply, all){
 
 TEST(div, all){
     bint_t a ( "55555555555555" );
+#ifdef EXCEPTION_OPT
     EXPECT_THROW( a / 0, std::exception );
+#endif
     EXPECT_EQ( 0, 0 / a);
     EXPECT_EQ( 0, 1 / a);
     EXPECT_EQ( a, a / 1);
@@ -115,19 +123,19 @@ TEST(div, all){
 
 
 
- /*
+
 TEST(pow, all){
     bint_t a ( "55555555555555" );
-    ASSERT_EQ(a ^ 0, 1);
-    ASSERT_EQ(0 ^ a, 1);
-    ASSERT_EQ(0 ^ 0, 1);
-    ASSERT_EQ(1 ^ a, 1);
-    ASSERT_EQ(a ^ 1, a);
-    EXPECT_EQ(a ^ 5, static_cast<bint_t>("529221494013419998645192975854798557130513429524632085243822926721875"));
+    ASSERT_EQ(pow(a, 0), 1);
+    ASSERT_EQ(pow(0, a), 0);
+    ASSERT_EQ(pow(0, 0), 1);
+    ASSERT_EQ(pow(1, a), 1);
+    ASSERT_EQ(pow(a, 1), a);
+    EXPECT_EQ(pow(a, 5), static_cast<bint_t>("529221494013419998645192975854798557130513429524632085243822926721875"));
     bint_t b = 55;
-    EXPECT_EQ(b^b, static_cast<bint_t>("524744532468751923546122657597368049278513737089035272057324643668607677682302892208099365234375"));
+    EXPECT_EQ(pow(b, b), static_cast<bint_t>("524744532468751923546122657597368049278513737089035272057324643668607677682302892208099365234375"));
 }
-*/
+
 
 
 TEST(zerroes, emty){

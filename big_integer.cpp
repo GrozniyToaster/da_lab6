@@ -139,7 +139,7 @@ namespace NBigInt {
         if (lhs.Data.size() != rhs.Data.size()) {
             return lhs.Data.size() > rhs.Data.size();
         }
-        for (int i = lhs.Data.size() - 1; i > 0; --i) {
+        for (int i = lhs.Data.size() - 1; i >= 0; --i) {
             if (lhs.Data[i] != rhs.Data[i]) {
                 return lhs.Data[i] > rhs.Data[i];
             }
@@ -311,6 +311,8 @@ namespace NBigInt {
             l.Data.resize(n, 0);
             r.Data.resize(n, 0);
             res.Data = TBint::KaratsubaMul( lhs.Data, rhs.Data ); // KaratsubaMul guarantees that lhs, rhs are const
+            l.DeleteLeadingZeroes();
+            r.DeleteLeadingZeroes();
         }else{
             res.Data = TBint::NaiveMul( lhs.Data, rhs.Data );
         }
@@ -376,7 +378,6 @@ namespace NBigInt {
             preCalculate.push_back(tmp);
         }
         int lSize = lhs.Data.size(), rSize = rhs.Data.size();
-        //std::vector<int64_t> ost;
         TBint ost;
 
         ost.Data.resize(rSize);
@@ -421,10 +422,29 @@ namespace NBigInt {
         return res;
     }
 
-
-
-
-
-
-
+    TBint pow(TBint a, TBint bigN) {
+        TBint zero;
+        TBint one (1);
+        if ( a == zero && bigN == zero ){
+            return one;
+        } else if (a == zero){
+            return zero;
+        } else if (a == one){
+            return one;
+        } else if (bigN == one){
+            return a;
+        }
+        TBint& res = one; // res = 1;
+        for (int i = 0; i < bigN.Data.size(); ++i){
+            auto n = bigN.Data[i];
+            while(n){
+                if (n & 1){
+                    res *= a;
+                }
+                a *= a;
+                n >>= 1;
+            }
+        }
+        return res;
+    }
 }
