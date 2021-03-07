@@ -14,7 +14,7 @@ namespace NBigInt{
         template<template <typename> class OC, typename OT>
         TSpan(TSpan<OC,OT>&& ) = delete;
 
-        TSpan(const Container<Type>& v ): v(v){}
+        TSpan(const Container<Type>& v): v(v){}
         TSpan(const Container<Type>& v, int start, int end ): v(v), begin(start), end(end) {}
 
         ~TSpan() = default;

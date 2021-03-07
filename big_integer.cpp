@@ -241,10 +241,10 @@ namespace NBigInt {
 
     void TBint::Finalize(std::vector<int64_t> &res){
         int64_t overflow = 0;
-        for (size_t i = 0; i < res.size(); ++i){
-            res[i] += overflow;
-            overflow = res[i] / TBint::BASE;
-            res[i] %= TBint::BASE;
+        for (int64_t& re : res){
+            re += overflow;
+            overflow = re / TBint::BASE;
+            re %= TBint::BASE;
         }
         if (overflow){
             res.push_back(overflow);
@@ -364,7 +364,7 @@ namespace NBigInt {
     TBint TBint::LongDivWay(const TBint &lhs, const TBint &rhs) {
         std::vector<TBint> preCalculate;
         preCalculate.reserve(TBint::BASE);
-        preCalculate.push_back(0);
+        preCalculate.emplace_back(0);
         preCalculate.push_back(rhs);
         TBint tmp = rhs;
         for ( int i = 2; i < TBint::BASE; ++i ){
@@ -416,21 +416,18 @@ namespace NBigInt {
         return res;
     }
 
-    TBint pow(TBint a, TBint bigN) {
+    TBint pow(TBint a, const TBint& bigN) {
         TBint zero;
         TBint one (1);
-        if ( a == zero && bigN == zero ){
+        if (bigN == zero || a == one){
             return one;
         } else if (a == zero){
             return zero;
-        } else if (a == one){
-            return one;
-        } else if (bigN == one){
+        }else if (bigN == one){
             return a;
         }
         TBint& res = one; // res = 1;
-        for (int i = 0; i < bigN.Data.size(); ++i){
-            auto n = bigN.Data[i];
+        for (long n : bigN.Data){
             while(n){
                 if (n & 1){
                     res *= a;

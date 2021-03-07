@@ -54,7 +54,7 @@ class TBint{
     friend bool operator!=( const TBint& lhs, const TBint& rhs );
     friend bool operator<=( const TBint& lhs, const TBint& rhs );
     friend bool operator>=( const TBint& lhs, const TBint& rhs );
-    friend TBint pow(TBint a, TBint n);
+    friend TBint pow(TBint a, const TBint& n);
 };
 
 }
