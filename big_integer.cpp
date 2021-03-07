@@ -18,19 +18,18 @@ namespace NBigInt {
     TBint::TBint(const std::string &str) {
         int newSize = ceil(static_cast<double> (str.size()) / TBint::RADIX);
         this->Data.resize(newSize);
-        int i = str.size();
-        //TVectorWatcher<std::basic_string, char> pp (str);
-        int d = 0;
-        for (auto next = i - TBint::RADIX; i > 0; d++, i = next, next = i - TBint::RADIX) {
-            int border = (next <= 0) ? 0 : next;
-            TVectorWatcher<std::basic_string, char> currentSegment (str, border, i);
-            this->Data[d] = StrToll(currentSegment);
+        for ( int rBorder = str.size(), digit = 0; rBorder > 0; rBorder -= TBint::RADIX, ++digit) {
+            int nextBorder = rBorder - TBint::RADIX;
+            int lBorder = (nextBorder <= 0) ? 0 : nextBorder;
+            TVectorWatcher<std::basic_string, char> curSeg (str, lBorder, rBorder); // Создаем отрезок для перевода
+            this->Data[digit] = StrToll(curSeg);
         }
         this->DeleteLeadingZeroes();
     }
 
     void TBint::DeleteLeadingZeroes() noexcept {
         while (!this->Data.empty() && this->Data.back() == 0) {
+
             this->Data.pop_back();
         }
     }

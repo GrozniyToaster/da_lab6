@@ -26,7 +26,6 @@ namespace NBigInt{
     };
 
     int64_t StrToll( const TVectorWatcher<std::basic_string, char>& segment);
-
     uint ClosestPower2( uint a );
 }
 

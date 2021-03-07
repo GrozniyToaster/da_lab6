@@ -9,8 +9,8 @@ namespace NBigInt{
         }
         return res;
     }
-    uint ClosestPower2( uint a ){
-        while ( a & (a - 1) ){
+    uint ClosestPower2(uint a){
+        while (a & (a - 1)){
             ++a;
         }
         return a;

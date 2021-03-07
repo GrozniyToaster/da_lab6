@@ -5,7 +5,7 @@
 #include <cmath>
 #include <iomanip>
 #include "big_integer_tools.hpp"
-//#define EXCEPTION_OPT //if define enable throwing exception in diff div etc (uncomment to on)
+//#define EXCEPTION_OPT //if define enable throwing exception in diff, div etc (uncomment to on)
 
 namespace NBigInt{
 
@@ -55,7 +55,6 @@ class TBint{
     friend bool operator<=( const TBint& lhs, const TBint& rhs );
     friend bool operator>=( const TBint& lhs, const TBint& rhs );
     friend TBint pow(TBint a, TBint n);
-
 };
 
 }
