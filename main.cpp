@@ -5,7 +5,7 @@
 using namespace NBigInt;
 
 int main(){
-    bint_t a, b;
+    TBint a, b;
     char action;
     while( std::cin >> a >> b >> action ){
         if ( action == '+' ){

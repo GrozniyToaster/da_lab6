@@ -8,7 +8,7 @@ find_package(Threads REQUIRED)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-add_executable(calculator main.cpp big_integer.cpp)
+add_executable(calculator main.cpp big_integer.cpp big_integer_tools.hpp)
 target_compile_options(calculator PRIVATE -Wall -Wextra)
 
 

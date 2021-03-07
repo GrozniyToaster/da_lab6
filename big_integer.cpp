@@ -1,12 +1,7 @@
 #include "big_integer.hpp"
 
 namespace NBigInt {
-    uint ClosestPower2( uint a ){
-        while ( a & (a - 1) ){
-            ++a;
-        }
-        return a;
-    }
+
 
     TBint::TBint(int64_t a) {
         if (a < TBint::BASE) {
@@ -26,6 +21,7 @@ namespace NBigInt {
         int newSize = ceil(static_cast<double> (str.size()) / TBint::RADIX);
         this->Data.resize(newSize);
         auto i = str.rbegin();
+        //TVectorWatcher<std::basic_string, char> pp (str);
         int d = 0;
         for (auto next = i + TBint::RADIX; i < str.rend(); d++, i = next, next = i + TBint::RADIX) {
             auto border = (next >= str.rend()) ? str.rend() : next;
@@ -233,7 +229,7 @@ namespace NBigInt {
 
     }
 
-    std::vector<int64_t> TBint::NaiveMul(const TVectorWatcher <int64_t> &rhs, const TVectorWatcher <int64_t> &lhs) {
+    std::vector<int64_t> TBint::NaiveMul(const TVectorWatcher <std::vector, int64_t> &rhs, const TVectorWatcher <std::vector, int64_t> &lhs) {
         auto lSize = rhs.Size(), rSize = lhs.Size();
         std::vector<int64_t> res;
         res.resize(lSize + rSize, 0);
@@ -257,7 +253,7 @@ namespace NBigInt {
         }
     }
 
-    std::vector<int64_t> TBint::KaratsubaMul(const TVectorWatcher <int64_t> &x, const TVectorWatcher <int64_t> &y) {
+    std::vector<int64_t> TBint::KaratsubaMul(const TVectorWatcher <std::vector, int64_t> &x, const TVectorWatcher <std::vector, int64_t> &y) {
         int n = x.Size();
         if (n <= TBint::KARATSUBA_NUMBER){
             auto res = TBint::NaiveMul(x,y);
@@ -268,10 +264,10 @@ namespace NBigInt {
         std::vector<int64_t> res (n * 2);
 
 
-        TVectorWatcher<int64_t> xr (x.v, x.begin, x.begin + k);
-        TVectorWatcher<int64_t> xl (x.v, x.begin + k, x.end);
-        TVectorWatcher<int64_t> yr (y.v, y.begin, y.begin + k);
-        TVectorWatcher<int64_t> yl (y.v, y.begin + k, y.end);
+        TVectorWatcher<std::vector, int64_t> xr (x.v, x.begin, x.begin + k);
+        TVectorWatcher<std::vector, int64_t> xl (x.v, x.begin + k, x.end);
+        TVectorWatcher<std::vector, int64_t> yr (y.v, y.begin, y.begin + k);
+        TVectorWatcher<std::vector, int64_t> yl (y.v, y.begin + k, y.end);
 
         std::vector<int64_t> p1 = TBint::KaratsubaMul(xl, yl);
         std::vector<int64_t> p2 = TBint::KaratsubaMul(xr, yr);
