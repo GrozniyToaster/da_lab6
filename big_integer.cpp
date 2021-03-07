@@ -66,7 +66,6 @@ namespace NBigInt {
         return res;
     }
 
-    //TODO чекуть лицом наличие с++17 и написать output_iterator
     std::istream &operator>>(std::istream &is, TBint &rhs) {
         std::string tmp;
         if (!(is >> tmp)) {
@@ -76,15 +75,17 @@ namespace NBigInt {
         rhs.Data.swap(newBInt.Data);
         return is;
     }
-// FIXME 11 -> 110
+
     std::ostream &operator<<(std::ostream &os, const TBint &rhs) {
         if (rhs.Data.empty()) {
             os << '0';
             return os;
         }
         os << rhs.Data.back();
-        os << std::setfill('0') << std::setw(TBint::RADIX);
-        std::copy(rhs.Data.rbegin() + 1, rhs.Data.rend(), std::ostream_iterator<int64_t>(os));
+
+        for ( auto it = rhs.Data.rbegin() + 1; it < rhs.Data.rend(); ++it ){
+            os << std::setfill('0') << std::setw(TBint::RADIX) << *it;
+        }
         os << std::resetiosflags(std::ios_base::basefield);
         return os;
     }
@@ -126,7 +127,7 @@ namespace NBigInt {
         if (lhs.Data.size() != rhs.Data.size()) {
             return lhs.Data.size() < rhs.Data.size();
         }
-        for (int i = lhs.Data.size() - 1; i > 0; --i) {
+        for (int i = lhs.Data.size() - 1; i >= 0; --i) {
             if (lhs.Data[i] != rhs.Data[i]) {
                 return lhs.Data[i] < rhs.Data[i];
             }
@@ -375,10 +376,12 @@ namespace NBigInt {
             preCalculate.push_back(tmp);
         }
         int lSize = lhs.Data.size(), rSize = rhs.Data.size();
-        std::vector<int64_t> ost;
-        ost.resize(rSize);
+        //std::vector<int64_t> ost;
+        TBint ost;
+
+        ost.Data.resize(rSize);
         for (auto i = 1; i <= rSize; ++i ){
-            ost[i - 1] = lhs.Data[lSize - i];
+            ost.Data[rSize - i] = lhs.Data[lSize - i];
         }
 
         std::vector<int64_t> preRes;
@@ -386,11 +389,9 @@ namespace NBigInt {
         //TODO проверить граници и разряды
         for (int i = rSize; i <= lSize; ++i ){
             int fraction = TBint::BinSearchHelper(ost, preCalculate);
-            //FIXME
-            TBint::DiffHelper(ost, preCalculate[fraction] );
-            //ost -= preCalculate[fraction];
+            ost -= preCalculate[fraction];
             preRes.push_back(fraction);
-            ost.push_back(lhs.Data[lSize - i - 1]);
+            ost.Data.insert(ost.Data.begin(),lhs.Data[lSize - i - 1]);
         }
         TBint res;
         res.Data.reserve(preRes.size());
@@ -406,11 +407,11 @@ namespace NBigInt {
         return res;
     }
 
-    int64_t TBint::BinSearchHelper(const std::vector<int64_t> &ost, const std::vector<TBint> &preCalculated) {
+    int64_t TBint::BinSearchHelper(const TBint& ost, const std::vector<TBint> &preCalculated) {
         int l = 0, r = TBint::BASE;
         while (r - 1 > l){
             int m = (r + l) >> 1; // analog (r + l) / 2
-            if ( TBint::LessHelper( ost, preCalculated[m] ) ){
+            if (ost < preCalculated[m]){
                 r = m;
             }else{
                 l = m;
@@ -420,42 +421,10 @@ namespace NBigInt {
         return res;
     }
 
-    inline bool TBint::LessHelper(const std::vector<int64_t> &ost, const TBint &toCheck) {
-        size_t tcSize = toCheck.Data.size();
-        if (ost.size() != tcSize){
-            return ost.size() < tcSize;
-        }
-        for (size_t i = 0; i < tcSize; ++i){
-            if (ost[i] != toCheck.Data[tcSize - i - 1]){
-                return ost[i] < toCheck.Data[tcSize - i - 1];
-            }
-        }
-        return false;
-    }
 
-    void TBint::DiffHelper(std::vector<int64_t>& ost, const TBint& diff) {
-        int lSize = ost.size(), rSize = diff.Data.size();
-        int m = std::min(lSize, rSize);
-        int64_t underflow = 0;
-        for (int i = 0; i < m; ++i) {
-            ost[lSize - i - 1] -= underflow;
-            underflow = 0;
-            if (i < rSize) {
-                ost[lSize - i - 1] -= diff.Data[i];
-            }
-            if (ost[lSize - i - 1] < 0) {
-                underflow = 1;
-                ost[lSize - i - 1] += TBint::BASE;
-            }
-            ost[lSize - i - 1] = ost[lSize - i - 1] % TBint::BASE;
-        }
-        size_t i = 0;
-        while (ost[i] == 0 && i < ost.size()){
-            ++i;
-        }
-        int firstNonZero = i;
-        ost.erase(ost.begin(), ost.begin() + firstNonZero);
-    }
+
+
+
 
 
 }

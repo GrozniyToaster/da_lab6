@@ -52,7 +52,7 @@ class TBint{
     static void Finalize(std::vector<int64_t>& res);
 
     static TBint LongDivWay(const TBint& lhs, const TBint& rhs);
-    static int64_t BinSearchHelper(const std::vector<int64_t> &ost, const std::vector<TBint> &preCalculated);
+    static int64_t BinSearchHelper(const TBint& ost, const std::vector<TBint> &preCalculated);
     static bool LessHelper(const std::vector<int64_t>& ost, const TBint& toCheck);
     static void DiffHelper(std::vector<int64_t>& ost, const TBint& diff);
   public:
