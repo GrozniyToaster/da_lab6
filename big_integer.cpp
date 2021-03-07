@@ -374,19 +374,18 @@ namespace NBigInt {
         int lSize = lhs.Data.size(), rSize = rhs.Data.size();
         TBint ost;
 
-        ost.Data.resize(rSize);
-        for (auto i = 1; i <= rSize; ++i ){
+        ost.Data.resize(rSize - 1);
+        for (auto i = 1; i < rSize; ++i ){
             ost.Data[rSize - i] = lhs.Data[lSize - i];
         }
 
         std::vector<int64_t> preRes;
         preRes.reserve( lSize >> 1 ); // reserve lSize/2 memory
-        //TODO проверить граници и разряды
         for (int i = rSize; i <= lSize; ++i ){
+            ost.Data.insert(ost.Data.begin(),lhs.Data[lSize - i]);
             int fraction = TBint::BinSearchHelper(ost, preCalculate);
             ost -= preCalculate[fraction];
             preRes.push_back(fraction);
-            ost.Data.insert(ost.Data.begin(),lhs.Data[lSize - i - 1]);
         }
         TBint res;
         res.Data.reserve(preRes.size());
@@ -427,7 +426,7 @@ namespace NBigInt {
             return a;
         }
         TBint& res = one; // res = 1;
-        for (long n : bigN.Data){
+        for (int64_t n : bigN.Data){
             while(n){
                 if (n & 1){
                     res *= a;
