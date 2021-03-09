@@ -11,8 +11,8 @@ namespace NBigInt{
 
 class TBint{
   private:  
-    static const int BASE = 100;
-    static const int RADIX = 2;
+    static const int BASE = 1e5;
+    static const int RADIX = 5;
     static const int KARATSUBA_NUMBER = 32; // the number of digits from which the Karatsuba algorithm begins to work
     std::vector<int64_t> Data;
 

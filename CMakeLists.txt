@@ -8,13 +8,14 @@ find_package(Threads REQUIRED)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
-add_executable(calculator main.cpp big_integer.cpp big_integer_tools.cpp)
+add_executable(calculator main.cpp )
 target_compile_options(calculator PRIVATE -Wall -Wextra)
 
+add_library( BI SHARED  big_integer.cpp big_integer_tools.cpp )
 
 add_executable( TestCalculator big_integer.cpp big_integer_tools.cpp test/GTestCalc.cpp)
-target_link_libraries( TestCalculator ${GTEST_LIBRARIES} Threads::Threads )
-
+target_link_libraries( TestCalculator ${GTEST_LIBRARIES} Threads::Threads BI)
+target_link_libraries( calculator BI )
 
 enable_testing()
 add_test(TestCalculator "./TestCalculator")

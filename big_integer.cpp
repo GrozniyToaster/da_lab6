@@ -376,7 +376,7 @@ namespace NBigInt {
 
         ost.Data.resize(rSize - 1);
         for (auto i = 1; i < rSize; ++i ){
-            ost.Data[rSize - i] = lhs.Data[lSize - i];
+            ost.Data[rSize - 1 - i] = lhs.Data[lSize - i];
         }
 
         std::vector<int64_t> preRes;
